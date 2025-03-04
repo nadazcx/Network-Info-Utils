@@ -366,7 +366,6 @@ def get_all_network_info():
 
 
 
-
 def get_frequency_band(frequency):
     frequency_mhz = frequency / 1_000_000
     return "2.4 GHz" if frequency_mhz < 3000 else "5 GHz"
@@ -388,15 +387,20 @@ def scan_networks():
     results = iface.scan_results()
     
     networks = []
+    seen_ssids = set()  # To track SSIDs that have already been added
+    
     for network in results:
-        band = get_frequency_band(network.freq)
-        security = get_security_type(network.akm)
-        networks.append({
-            "SSID": network.ssid,
-            "Signal Strength": network.signal,
-            "Security": security,
-            "Band": band
-        })
+        if network.ssid not in seen_ssids:  # Check if this SSID has already been added
+            band = get_frequency_band(network.freq)
+            security = get_security_type(network.akm)
+            networks.append({
+                "SSID": network.ssid,
+                "Signal Strength": network.signal,
+                "Security": security,
+                "Band": band
+            })
+            seen_ssids.add(network.ssid)  # Mark this SSID as seen
+    
     return networks
 
 def display_current_network():
@@ -426,4 +430,3 @@ def display_current_network():
             }
 
     return "Current network details not found in scan results."
-  
